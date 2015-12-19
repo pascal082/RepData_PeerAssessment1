@@ -22,15 +22,38 @@ Loading and preprocessing the data
 Load and read data:
 
 
-```{r echo = TRUE}
 
+```r
 library(ggplot2)
-library(dplyr)
-
 ```
 
-```{r echo = TRUE}
+```
+## Warning: package 'ggplot2' was built under R version 3.2.3
+```
 
+```r
+library(dplyr)
+```
+
+```
+## Warning: package 'dplyr' was built under R version 3.2.3
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+
+```r
 library(lattice)
 fileUrl<-"https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
 
@@ -38,48 +61,67 @@ download.file(fileUrl, destfile='./activity.zip',method='auto')
 unzip('./activity.zip', exdir='./files')
 data <- read.csv("./files/activity.csv", header = TRUE, colClasses = c("numeric", "character","integer"))
 data_wholes<-data[complete.cases(data),]
-
-
 ```
 
 ### What is the mean total number of steps taken per day?
 
-```{r echo = TRUE}
+
+```r
 datas<-aggregate(steps~date,data=data_wholes,sum)
 average<-mean(datas$steps) 
 mediana<-median(datas$steps)
 summary(datas)
+```
 
+```
+##      date               steps      
+##  Length:53          Min.   :   41  
+##  Class :character   1st Qu.: 8841  
+##  Mode  :character   Median :10765  
+##                     Mean   :10766  
+##                     3rd Qu.:13294  
+##                     Max.   :21194
 ```
 
 #### Calculate the total number of steps taken per day: 53
 #### mean:
-```{r echo = TRUE}
+
+```r
 average
 ```
 
+```
+## [1] 10766.19
+```
+
 #### meadian:
-```{r echo = TRUE}
+
+```r
 mediana
+```
+
+```
+## [1] 10765
 ```
 
 #### histogram of the total number of steps taken each day
 
-```{r echo = TRUE}
-hist(datas$steps, main = "Total steps taken each day (over available data)", xlab = "Range of steps", col = "red", breaks=pretty(0:22000, n=10))
 
+```r
+hist(datas$steps, main = "Total steps taken each day (over available data)", xlab = "Range of steps", col = "red", breaks=pretty(0:22000, n=10))
 ```
 
-###data manipulation
-```{r echo = TRUE}
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
 
+###data manipulation
+
+```r
 data_by_5_mins<-group_by(data_wholes,interval)
 average_by_interval<-summarize(data_by_5_mins,avg=mean(steps))
 names(average_by_interval)<-c("interval","average_steps")
 top_index<-which.max(average_by_interval$average_steps)
 top_interval<-average_by_interval[top_index,"interval"]
 max_avg_steps<-average_by_interval[top_index,"average_steps"]
-
 ```
 
 ### What is the average daily activity pattern?
@@ -87,9 +129,12 @@ max_avg_steps<-average_by_interval[top_index,"average_steps"]
 
 
 #### a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
-```{r echo = TRUE}
+
+```r
 plot(x=1:288,y=average_by_interval$average_steps,type="l", xlab="Five-Minute Intervals", ylab="Average Number of steps taken", main="AVERAGE DAILY ACTIVITY PATTERN (over available data)",lwd=3,col="blue")
 ```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
 
 
 ### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
@@ -103,50 +148,62 @@ On average, the maximum number of steps occurs in the interval whose ordinal num
 
 #### Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
-```{r echo = TRUE}
+
+```r
 NaDataSet<-data[!complete.cases(data),]
 totMissingValues<-length(NaDataSet[,1])
-
-
-
 ```
 #### total nunber of missing values
-```{r echo = TRUE}
+
+```r
 totMissingValues
+```
+
+```
+## [1] 2304
 ```
 #### I substituted the NA's with the mean value for their corresponding 5-minute interval.
 
-```{r echo = TRUE}
+
+```r
 NaDataSet[,"steps"]<-average_by_interval[,"average_steps"]
 data[!complete.cases(data),"steps"]<-NaDataSet[,"steps"]
-
-
 ```
 
 #### new dataset that is equal to the original dataset but with the missing data filled in
-```{r echo = TRUE}
-newDatas<-aggregate(steps~date,data=data,sum)
 
+```r
+newDatas<-aggregate(steps~date,data=data,sum)
 ```
 
 #### histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day
-```{r echo = TRUE}
+
+```r
 hist(newDatas$steps, main = "Total steps taken each day (over available and imputed data)", xlab = "Range of steps", col = "red", breaks=pretty(0:22000, n=10))
-
-
 ```
+
+![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-1.png) 
 #### new mean
-```{r echo = TRUE}
+
+```r
 newAverage<-mean(newDatas$steps)
 newAverage
 ```
 
+```
+## [1] 10766.19
+```
+
 
 ###new median
-```{r echo = TRUE}
+
+```r
 newMediana<-median(newDatas$steps)
 newMediana
+```
 
+```
+## [1] 10766.19
 ```
 ### The mean and median total number of steps taken per day are both the same as the mean total number of steps taken per day as measured by the originally available data above. The meadian is affected when the missing data is inputed.
 
@@ -158,7 +215,8 @@ newMediana
 #### Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 #### We would be separating the weekdays from weekends using the originally available dataset in the following code bellow.
 
-```{r echo = TRUE}
+
+```r
 data$date<-as.Date(data$date)
 data<-mutate(data,day="NA")
 weekend<-weekdays(data$date)=="Saturday" | weekdays(data$date)=="Sunday"
@@ -173,21 +231,22 @@ medieFestivo<-mutate(data2FestivoBis,average=mean(steps))
 medieBoth<-rbind(medieFeriale[1:288,],medieFestivo[1:288,])
 medieBothBis<-cbind(medieBoth,c(1:288,1:288))
 names(medieBothBis)<-c("steps","date","interval","day","average","ordinal_interval")
-
 ```
 
 ### A plot containing a time series of the 5-minute interval (x-axis) and the average number of steps take, averaged across all weekday days or weekend days (y-axis).
 
-```{r echo = TRUE}
-xyplot(average~ordinal_interval|day,type="l",data=medieBothBis, xlab="5-minute Interval" ,ylab="Number of Steps",lwd=3,layout=c(1,2))
 
+```r
+xyplot(average~ordinal_interval|day,type="l",data=medieBothBis, xlab="5-minute Interval" ,ylab="Number of Steps",lwd=3,layout=c(1,2))
 ```
+
+![plot of chunk unnamed-chunk-17](figure/unnamed-chunk-17-1.png) 
 
 
 ### The  code below calculates the 5-minute interval when motion is at its peak on weekday days.
-```{r echo = TRUE}
-peak_time<-medieFeriale$interval[which.max(medieFeriale$average[1:288])]
 
+```r
+peak_time<-medieFeriale$interval[which.max(medieFeriale$average[1:288])]
 ```
 
 ### We can see that the motion, when measured in terms of steps taken, is more intense and better distributed on weekend days that on weekday days.
